@@ -4,8 +4,8 @@ This is a repo that I'm using to learn OpenGL. I'm following this [tutorial](htt
 ## Chapters
 ### Getting started
 - [x] [OpenGL](https://learnopengl.com/Getting-started/OpenGL)
-- [ ] [Creating a window](https://learnopengl.com/Getting-started/Creating-a-window)
-- [ ] [Hello Window](https://learnopengl.com/Getting-started/Hello-Window)
+- [x] [Creating a window](https://learnopengl.com/Getting-started/Creating-a-window)
+- [x] [Hello Window](https://learnopengl.com/Getting-started/Hello-Window)
 - [ ] [Hello Triangle](https://learnopengl.com/Getting-started/Hello-Triangle)
 - [ ] [Shaders](https://learnopengl.com/Getting-started/Shaders)
 - [ ] [Textures](https://learnopengl.com/Getting-started/Textures)
