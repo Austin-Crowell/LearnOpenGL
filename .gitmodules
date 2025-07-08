@@ -1,0 +1,3 @@
+[submodule "LearnOpenGL/external/GLFW"]
+	path = LearnOpenGL/external/GLFW
+	url = https://github.com/glfw/glfw.git
