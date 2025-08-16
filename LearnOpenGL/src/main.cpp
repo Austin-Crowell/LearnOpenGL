@@ -2,6 +2,11 @@
 #include <GLFW/glfw3.h>
 
 #include <iostream>
+#include <cmath>
+
+#include "Shader.hpp"
+
+#define USE_EBO false
 
 int WindowWidth, WindowHeight;
 
@@ -72,7 +77,7 @@ int main()
 
   glfwMakeContextCurrent(Window);
 
-  if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
+  if (!gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress)))
   {
     std::cerr << "Failed to initialize GLAD." << std::endl;
     return -1;
@@ -85,90 +90,19 @@ int main()
   constexpr IntRGBA CornFlowerBlueInt = { .Red = 100, .Green = 149, .Blue = 237, .Alpha = 1 };
   constexpr FloatRGBA CornFlowerBlueFloat = IntRGBAToFloat(CornFlowerBlueInt);
 
-  const char* VertexShaderSource = "#version 330 core\n"
-    "layout (location = 0) in vec3 aPos;\n"
-    "void main()\n"
-    "{\n"
-    "  gl_Position = vec4(aPos, 1.0);\n"
-    "}\n";
-
-  const char* FragmentShaderSource = "#version 330 core\n"
-    "out vec4 FragColor;\n"
-    "void main()\n"
-    "{\n"
-    "FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
-    "}\n";
-
-  uint32_t VertexShader = glCreateShader(GL_VERTEX_SHADER);
-  uint32_t FragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-
-  glShaderSource(VertexShader, 1, &VertexShaderSource, nullptr);
-  glCompileShader(VertexShader);
-
-  glShaderSource(FragmentShader, 1, &FragmentShaderSource, nullptr);
-  glCompileShader(FragmentShader);
-
-  int IsSuccessful = 0;
-  char LogInfo[512];
-  glGetShaderiv(VertexShader, GL_COMPILE_STATUS, &IsSuccessful);
-
-  if (!IsSuccessful)
-  {
-    glGetShaderInfoLog(VertexShader, 512, nullptr, LogInfo);
-    std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED:\n" << LogInfo << std::endl;
-  }
-
-  glGetShaderiv(VertexShader, GL_COMPILE_STATUS, &IsSuccessful);
-
-  if (!IsSuccessful)
-  {
-    glGetShaderInfoLog(FragmentShader, 512, nullptr, LogInfo);
-    std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED:\n" << LogInfo << std::endl;
-  }
-
-  uint32_t ShaderProgram = glCreateProgram();
-
-  glAttachShader(ShaderProgram, VertexShader);
-  glAttachShader(ShaderProgram, FragmentShader);
-
-  glLinkProgram(ShaderProgram);
-
-  glGetProgramiv(ShaderProgram, GL_LINK_STATUS, &IsSuccessful);
-
-  if (!IsSuccessful)
-  {
-    glGetProgramInfoLog(ShaderProgram, 512, nullptr, LogInfo);
-    std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED:\n" << LogInfo << std::endl;
-  }
-
-  glDeleteShader(VertexShader);
-  glDeleteShader(FragmentShader);
-
-  VertexShader = FragmentShader = 0;
+  Shader ShaderProgram("LearnOpenGL/src/Shaders/Vertex.glsl", "LearnOpenGL/src/Shaders/Fragment.glsl");
 
   const float VerticeData[]
   {
-    -0.05f,  0.5f, 0.0f,   // Top Right
-    -0.05f, -0.5f, 0.0f,   // Bottom Right
-    -0.80f, -0.5f, 0.0f,   // Bottom Left
-    -0.80f,  0.5f, 0.0f,   // Top Right
+    0.5f, -0.5f, 0.0f,  1.0f, 0.0f, 0.0f,  // Bottom Right
+    -0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, // Bottom Left
+    0.0f, 0.5f, 0.0f,   0.0f, 0.0f, 1.0f// Top
   };
 
+#if USE_EBO
   const uint32_t Indices[] =
   {
-    0, 1, 3, // First Triangle
-    1, 2, 3, // Second Triangle
-  };
-
-  float Triangles[]
-  {
-    0.8f,  0.5f, 0.0f,   // Top Right
-    0.8f,  -0.5f, 0.0f,  // Bottom Right
-    0.05f, 0.5f, 0.0f,   // Top Left
-
-    0.8f, -0.5f, 0.0f,  // Bottom Right
-    0.05f,  -0.5f, 0.0f,  // Bottom Left
-    0.05f,  0.5f, 0.0f,  // Top Left
+    0, 1, 2
   };
 
   // Element Buffer Object
@@ -188,48 +122,55 @@ int main()
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ElementBufferObject);
   glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(Indices), Indices, GL_STATIC_DRAW);
 
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), static_cast<void*>(nullptr));
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), static_cast<void*>(nullptr));
   glEnableVertexAttribArray(0);
 
+  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), reinterpret_cast<void*>(3 * sizeof(float)));
+  glEnableVertexAttribArray(1);
+#else
   // Vertex Array Object
-  uint32_t VertexArrayObjectTriangles = 0;
-  uint32_t VertexBufferObjectTriangles = 0;
+  uint32_t VertexArrayObject = 0;
+  uint32_t VertexBufferObject = 0;
 
-  glGenVertexArrays(1, &VertexArrayObjectTriangles);
-  glGenBuffers(1, &VertexBufferObjectTriangles);
+  glGenVertexArrays(1, &VertexArrayObject);
+  glGenBuffers(1, &VertexBufferObject);
 
-  glBindVertexArray(VertexArrayObjectTriangles);
+  glBindVertexArray(VertexArrayObject);
 
-  glBindBuffer(GL_ARRAY_BUFFER, VertexBufferObjectTriangles);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(Triangles), Triangles, GL_STATIC_DRAW);
+  glBindBuffer(GL_ARRAY_BUFFER, VertexBufferObject);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(VerticeData), VerticeData, GL_STATIC_DRAW);
 
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), static_cast<void*>(nullptr));
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), static_cast<void*>(nullptr));
   glEnableVertexAttribArray(0);
+
+  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), reinterpret_cast<void*>(3 * sizeof(float)));
+  glEnableVertexAttribArray(1);
 
   glBindBuffer(GL_ARRAY_BUFFER, 0);
   glBindVertexArray(0);
-
+#endif
 
   //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
   while (!glfwWindowShouldClose(Window))
   {
+    const float Time = static_cast<float>(glfwGetTime());
     ProcessInput(Window);
 
     glClearColor(CornFlowerBlueFloat.Red, CornFlowerBlueFloat.Green, CornFlowerBlueFloat.Blue, CornFlowerBlueFloat.Alpha);
     glClear(GL_COLOR_BUFFER_BIT);
-
+#if USE_EBO
     // Element Buffer Object
-    glUseProgram(ShaderProgram);
+    ShaderProgram.Use();
     glBindVertexArray(VertexArrayObject);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
     glBindVertexArray(0);
-
+#else
     // Vertex Array Object
-    glUseProgram(ShaderProgram);
-    glBindVertexArray(VertexArrayObjectTriangles);
-    glDrawArrays(GL_TRIANGLES, 0, 6);
+    ShaderProgram.Use();
+    glBindVertexArray(VertexArrayObject);
+    glDrawArrays(GL_TRIANGLES, 0, 3);
     glBindVertexArray(0);
-
+#endif
     glfwSwapBuffers(Window);
     glfwPollEvents();
   }
