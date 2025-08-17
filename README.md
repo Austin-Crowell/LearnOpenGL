@@ -8,7 +8,7 @@ This is a repo that I'm using to learn OpenGL. I'm following this [tutorial](htt
 - [x] [Hello Window](https://learnopengl.com/Getting-started/Hello-Window)
 - [x] [Hello Triangle](https://learnopengl.com/Getting-started/Hello-Triangle)
 - [x] [Shaders](https://learnopengl.com/Getting-started/Shaders)
-- [ ] [Textures](https://learnopengl.com/Getting-started/Textures)
+- [x] [Textures](https://learnopengl.com/Getting-started/Textures)
 - [ ] [Transformations](https://learnopengl.com/Getting-started/Transformations)
 - [ ] [Coordinate Systems](https://learnopengl.com/Getting-started/Coordinate-Systems)
 - [ ] [Camera](https://learnopengl.com/Getting-started/Camera)

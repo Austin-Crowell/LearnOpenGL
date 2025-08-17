@@ -1,14 +1,17 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
 
 #include <iostream>
 #include <cmath>
 
 #include "Shader.hpp"
 
-#define USE_EBO false
+#define USE_EBO true
 
 int WindowWidth, WindowHeight;
+float DeltaTime = 0.0f;
 
 void FramebufferSizeCallback(GLFWwindow* Window, const int Width, const int Height);
 
@@ -94,15 +97,18 @@ int main()
 
   const float VerticeData[]
   {
-    0.5f, -0.5f, 0.0f,  1.0f, 0.0f, 0.0f,  // Bottom Right
-    -0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, // Bottom Left
-    0.0f, 0.5f, 0.0f,   0.0f, 0.0f, 1.0f// Top
+    // positions          // colors           // texture coords
+    0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f,   // top right
+    0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f,   // bottom right
+   -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f,   // bottom left
+   -0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f    // top left
   };
 
 #if USE_EBO
   const uint32_t Indices[] =
   {
-    0, 1, 2
+    0, 1, 3,
+    1, 2, 3,
   };
 
   // Element Buffer Object
@@ -122,11 +128,15 @@ int main()
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ElementBufferObject);
   glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(Indices), Indices, GL_STATIC_DRAW);
 
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), static_cast<void*>(nullptr));
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), static_cast<void*>(nullptr));
   glEnableVertexAttribArray(0);
 
-  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), reinterpret_cast<void*>(3 * sizeof(float)));
+  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), reinterpret_cast<void*>(3 * sizeof(float)));
   glEnableVertexAttribArray(1);
+
+  glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), reinterpret_cast<void*>(6 * sizeof(float)));
+  glEnableVertexAttribArray(2);
+
 #else
   // Vertex Array Object
   uint32_t VertexArrayObject = 0;
@@ -150,6 +160,61 @@ int main()
   glBindVertexArray(0);
 #endif
 
+  stbi_set_flip_vertically_on_load(true);
+
+  uint32_t TextureID = 0;
+  glGenTextures(1, &TextureID);
+  glBindTexture(GL_TEXTURE_2D, TextureID);
+
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  {
+    int Width, Height, nrChannels;
+    uint8_t* Data = stbi_load("LearnOpenGL/Assets/Textures/container.jpg", &Width, &Height, &nrChannels, 0);
+    if (Data)
+    {
+      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, Width, Height, 0, GL_RGB, GL_UNSIGNED_BYTE, Data);
+      glGenerateMipmap(GL_TEXTURE_2D);
+    }
+    else
+      std::cerr << "Failed to load texture image." << std::endl;
+
+    glBindTexture(GL_TEXTURE_2D, 0);
+    stbi_image_free(Data);
+  }
+
+  uint32_t TextureIDFace = 0;
+  glGenTextures(1, &TextureIDFace);
+  glBindTexture(GL_TEXTURE_2D, TextureIDFace);
+
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+  {
+    int Width, Height, nrChannels;
+    uint8_t* Data = stbi_load("LearnOpenGL/Assets/Textures/awesomeface.png", &Width, &Height, &nrChannels, 0);
+    if (Data)
+    {
+      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, Width, Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, Data);
+      glGenerateMipmap(GL_TEXTURE_2D);
+    }
+    else
+      std::cerr << "Failed to load texture image." << std::endl;
+
+    glBindTexture(GL_TEXTURE_2D, 0);
+    stbi_image_free(Data);
+  }
+
+  ShaderProgram.Use();
+  ShaderProgram.SetIntParameter("Texture1", 0);
+  ShaderProgram.SetIntParameter("Texture2", 1);
+
   //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
   while (!glfwWindowShouldClose(Window))
   {
@@ -160,10 +225,15 @@ int main()
     glClear(GL_COLOR_BUFFER_BIT);
 #if USE_EBO
     // Element Buffer Object
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, TextureID);
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, TextureIDFace);
     ShaderProgram.Use();
     glBindVertexArray(VertexArrayObject);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
     glBindVertexArray(0);
+    glBindTexture(GL_TEXTURE_2D, 0);
 #else
     // Vertex Array Object
     ShaderProgram.Use();
@@ -173,7 +243,13 @@ int main()
 #endif
     glfwSwapBuffers(Window);
     glfwPollEvents();
+
+    DeltaTime = static_cast<float>(glfwGetTime() - Time);
   }
+
+  glDeleteVertexArrays(1, &VertexArrayObject);
+  glDeleteBuffers(1, &VertexBufferObject);
+  glDeleteBuffers(1, &ElementBufferObject);
 
   glfwTerminate();
   return 0;
