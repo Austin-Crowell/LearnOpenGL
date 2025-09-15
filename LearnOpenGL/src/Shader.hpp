@@ -5,6 +5,8 @@
 #include <string>
 #include <iostream>
 
+#include "glm/fwd.hpp"
+
 class Shader
 {
 public:
@@ -21,6 +23,15 @@ public:
   void SetBoolParameter(const std::string& ParameterName, bool Value) const;
   void SetIntParameter(const std::string& ParameterName, int Value) const;
   void SetFloatParameter(const std::string& ParameterName, float Value) const;
+
+  void SetVec4Parameter(const std::string& ParameterName, glm::vec4 Value) const;
+  void SetVec3Parameter(const std::string& ParameterName, glm::vec3 Value) const;
+  void SetVec2Parameter(const std::string& ParameterName, glm::vec2 Value) const;
+
+  void SetMat4Parameter(const std::string& ParameterName, const glm::mat4& Value) const;
+  void SetMat3Parameter(const std::string& ParameterName, const glm::mat3& Value) const;
+  void SetMat2Parameter(const std::string& ParameterName, const glm::mat2& Value) const;
+
 private:
   void CheckCompileErrors(const uint32_t Shader, const ShaderType Type) const;
   void CheckProgramErrors(const uint32_t Program) const;

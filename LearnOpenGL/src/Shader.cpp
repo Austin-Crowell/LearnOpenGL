@@ -5,6 +5,8 @@
 #include <iostream>
 #include <sstream>
 
+#include "glm/gtc/type_ptr.hpp"
+
 Shader::Shader(const char* VertexPath, const char* FragmentPath)
 {
   std::string VertexSource;
@@ -70,6 +72,36 @@ void Shader::SetIntParameter(const std::string &ParameterName, int Value) const
 void Shader::SetFloatParameter(const std::string &ParameterName, float Value) const
 {
   glUniform1f(glGetUniformLocation(m_ProgramID, ParameterName.c_str()), Value);
+}
+
+void Shader::SetVec4Parameter(const std::string &ParameterName, glm::vec4 Value) const
+{
+  glUniform4fv(glGetUniformLocation(m_ProgramID, ParameterName.c_str()), 1, glm::value_ptr(Value));
+}
+
+void Shader::SetVec3Parameter(const std::string &ParameterName, glm::vec3 Value) const
+{
+  glUniform3fv(glGetUniformLocation(m_ProgramID, ParameterName.c_str()), 1, glm::value_ptr(Value));
+}
+
+void Shader::SetVec2Parameter(const std::string &ParameterName, glm::vec2 Value) const
+{
+  glUniform2fv(glGetUniformLocation(m_ProgramID, ParameterName.c_str()), 1, glm::value_ptr(Value));
+}
+
+void Shader::SetMat4Parameter(const std::string &ParameterName, const glm::mat4& Value) const
+{
+  glUniformMatrix4fv(glGetUniformLocation(m_ProgramID, ParameterName.c_str()), 1, GL_FALSE, glm::value_ptr(Value));
+}
+
+void Shader::SetMat3Parameter(const std::string &ParameterName, const glm::mat3& Value) const
+{
+  glUniformMatrix3fv(glGetUniformLocation(m_ProgramID, ParameterName.c_str()), 1, GL_FALSE, glm::value_ptr(Value));
+}
+
+void Shader::SetMat2Parameter(const std::string &ParameterName, const glm::mat2& Value) const
+{
+  glUniformMatrix2fv(glGetUniformLocation(m_ProgramID, ParameterName.c_str()), 1, GL_FALSE, glm::value_ptr(Value));
 }
 
 void Shader::CheckCompileErrors(const uint32_t Shader, const ShaderType Type) const
