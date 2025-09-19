@@ -12,7 +12,7 @@
 
 #include "Shader.hpp"
 
-int WindowWidth, WindowHeight;
+float WindowWidth = 0.1f, WindowHeight = 0.1f;
 float DeltaTime = 0.0f;
 
 void ProcessInput(GLFWwindow* Window);
@@ -142,6 +142,7 @@ int main()
   ShaderProgram.SetIntParameter("u_Texture2", 1);
 
   //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+  glEnable(GL_DEPTH_TEST);
 
   float LastFrameTime = 0.0f;
   while (!glfwWindowShouldClose(Window))
@@ -153,17 +154,21 @@ int main()
     ProcessInput(Window);
 
     glClearColor(0.392f, 0.584f, 0.930f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    auto Transform = glm::mat4(1.0f);
+    auto Model = glm::mat4(1.0f);
+    Model = glm::rotate(Model, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 
-    Transform = glm::translate(Transform, glm::vec3(0.5f, -0.5f, 0.0f));
-    Transform = glm::rotate(Transform, CurrentTime, glm::vec3(0.0f, 0.0f, 1.0f));
-    Transform = glm::scale(Transform, glm::vec3(0.75f, 0.75f, 1.0f));
+    auto View = glm::mat4(1.0f);
+    View = glm::translate(View, glm::vec3(0.0f, 0.0f, -3.0f));
 
+    auto Projection = glm::mat4(1.0f);
+    Projection = glm::perspective(glm::radians(45.0f), WindowWidth / WindowHeight, 0.1f, 100.0f);
 
     ShaderProgram.Use();
-    ShaderProgram.SetMat4Parameter("u_Transform", Transform);
+    ShaderProgram.SetMat4Parameter("u_Model", Model);
+    ShaderProgram.SetMat4Parameter("u_View", View);
+    ShaderProgram.SetMat4Parameter("u_Projection", Projection);
 
     // Element Buffer Object
     glActiveTexture(GL_TEXTURE0);

@@ -10,7 +10,7 @@ This is a repo that I'm using to learn OpenGL. I'm following this [tutorial](htt
 - [x] [Shaders](https://learnopengl.com/Getting-started/Shaders)
 - [x] [Textures](https://learnopengl.com/Getting-started/Textures)
 - [x] [Transformations](https://learnopengl.com/Getting-started/Transformations)
-- [ ] [Coordinate Systems](https://learnopengl.com/Getting-started/Coordinate-Systems)
+- [x] [Coordinate Systems](https://learnopengl.com/Getting-started/Coordinate-Systems)
 - [ ] [Camera](https://learnopengl.com/Getting-started/Camera)
 ### Lighting
 - [ ] [Colors](https://learnopengl.com/Lighting/Colors)
