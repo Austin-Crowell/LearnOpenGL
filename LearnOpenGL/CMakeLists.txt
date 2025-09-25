@@ -2,6 +2,8 @@ set(LEARN_OPENGL_SOURCES
   ./src/main.cpp
   ./src/Shader.cpp
   ./src/Shader.hpp
+  ./src/Camera.cpp
+  ./src/Camera.hpp
 )
 
 add_subdirectory(external/GLFW)

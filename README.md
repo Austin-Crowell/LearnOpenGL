@@ -11,7 +11,7 @@ This is a repo that I'm using to learn OpenGL. I'm following this [tutorial](htt
 - [x] [Textures](https://learnopengl.com/Getting-started/Textures)
 - [x] [Transformations](https://learnopengl.com/Getting-started/Transformations)
 - [x] [Coordinate Systems](https://learnopengl.com/Getting-started/Coordinate-Systems)
-- [ ] [Camera](https://learnopengl.com/Getting-started/Camera)
+- [x] [Camera](https://learnopengl.com/Getting-started/Camera)
 ### Lighting
 - [ ] [Colors](https://learnopengl.com/Lighting/Colors)
 - [ ] [Basic Lighting](https://learnopengl.com/Lighting/Basic-Lighting)
