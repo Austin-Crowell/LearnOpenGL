@@ -13,7 +13,7 @@ This is a repo that I'm using to learn OpenGL. I'm following this [tutorial](htt
 - [x] [Coordinate Systems](https://learnopengl.com/Getting-started/Coordinate-Systems)
 - [x] [Camera](https://learnopengl.com/Getting-started/Camera)
 ### Lighting
-- [ ] [Colors](https://learnopengl.com/Lighting/Colors)
+- [x] [Colors](https://learnopengl.com/Lighting/Colors)
 - [ ] [Basic Lighting](https://learnopengl.com/Lighting/Basic-Lighting)
 - [ ] [Materials](https://learnopengl.com/Lighting/Materials)
 - [ ] [Lighting maps](https://learnopengl.com/Lighting/Lighting-maps)
