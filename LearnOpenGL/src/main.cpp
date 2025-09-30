@@ -24,6 +24,14 @@ void FramebufferSizeCallback(GLFWwindow* Window, int Width, int Height);
 void MouseMovementCallback(GLFWwindow* Window, double XPos, double YPos);
 void ScrollCallback(GLFWwindow* Window, double XOffset, double YOffset);
 
+struct Vertex
+{
+  glm::vec3 Position;
+  glm::vec3 Color;
+  glm::vec2 TexCoords;
+};
+
+
 int main()
 {
   glfwInit();
@@ -56,99 +64,204 @@ int main()
   glfwSetScrollCallback(Window, ScrollCallback);
 
   Shader ShaderProgram("LearnOpenGL/src/Shaders/Vertex.glsl", "LearnOpenGL/src/Shaders/Fragment.glsl");
+  Shader LightShader("LearnOpenGL/src/Shaders/LightVertex.glsl", "LearnOpenGL/src/Shaders/LightFragment.glsl");
 
-  const float VerticeData[]
+  float VerticeData[288] =
   {
-    // positions texture coords
-    0.5f,  0.5f, 0.0f, 1.0f, 1.0f,   // top right
-    0.5f, -0.5f, 0.0f, 1.0f, 0.0f,   // bottom right
-    -0.5f, -0.5f, 0.0f, 0.0f, 0.0f,  // bottom left
-    -0.5f,  0.5f, 0.0f, 0.0f, 1.0f   // top left
+    // Position(vec3)    Color(vec3)       TexCoord(vec2)
+    -0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+    0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+    0.5f,  0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+    0.5f,  0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+    -0.5f,  0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+    -0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+
+    -0.5f, -0.5f,  0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+    0.5f, -0.5f,  0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+    0.5f,  0.5f,  0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+    0.5f,  0.5f,  0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+    -0.5f,  0.5f,  0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+    -0.5f, -0.5f,  0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+
+    -0.5f,  0.5f,  0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+    -0.5f,  0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+    -0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+    -0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+    -0.5f, -0.5f,  0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+    -0.5f,  0.5f,  0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+
+    0.5f,  0.5f,  0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+    0.5f,  0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+    0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+    0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+    0.5f, -0.5f,  0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+    0.5f,  0.5f,  0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+
+    -0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+    0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+    0.5f, -0.5f,  0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+    0.5f, -0.5f,  0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+    -0.5f, -0.5f,  0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+    -0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+
+    -0.5f,  0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+    0.5f,  0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+    0.5f,  0.5f,  0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+    0.5f,  0.5f,  0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+    -0.5f,  0.5f,  0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+    -0.5f,  0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f
   };
 
-  const uint32_t Indices[] =
+  for (size_t i = 3; i < 288; i += (sizeof(Vertex) / sizeof(float)))
   {
-    0, 1, 3,
-    1, 2, 3,
+    VerticeData[i] = 1.0f;
+    VerticeData[i + 1] = 0.5f;
+    VerticeData[i + 2] = 0.31f;
+
+    std::cout << std::format("Red: {0}, Blue: {1}, Green: {2}", VerticeData[i], VerticeData[i + 1], VerticeData[i + 2]) << std::endl;
+  }
+  glm::vec3 LightPosition = { 1.2f, 1.0f, 2.0f};
+  float LightVerticeData[] =
+  {
+    -0.5f, -0.5f, -0.5f,
+     0.5f, -0.5f, -0.5f,
+     0.5f,  0.5f, -0.5f,
+     0.5f,  0.5f, -0.5f,
+    -0.5f,  0.5f, -0.5f,
+    -0.5f, -0.5f, -0.5f,
+
+    -0.5f, -0.5f,  0.5f,
+     0.5f, -0.5f,  0.5f,
+     0.5f,  0.5f,  0.5f,
+     0.5f,  0.5f,  0.5f,
+    -0.5f,  0.5f,  0.5f,
+    -0.5f, -0.5f,  0.5f,
+
+    -0.5f,  0.5f,  0.5f,
+    -0.5f,  0.5f, -0.5f,
+    -0.5f, -0.5f, -0.5f,
+    -0.5f, -0.5f, -0.5f,
+    -0.5f, -0.5f,  0.5f,
+    -0.5f,  0.5f,  0.5f,
+
+     0.5f,  0.5f,  0.5f,
+     0.5f,  0.5f, -0.5f,
+     0.5f, -0.5f, -0.5f,
+     0.5f, -0.5f, -0.5f,
+     0.5f, -0.5f,  0.5f,
+     0.5f,  0.5f,  0.5f,
+
+    -0.5f, -0.5f, -0.5f,
+     0.5f, -0.5f, -0.5f,
+     0.5f, -0.5f,  0.5f,
+     0.5f, -0.5f,  0.5f,
+    -0.5f, -0.5f,  0.5f,
+    -0.5f, -0.5f, -0.5f,
+
+    -0.5f,  0.5f, -0.5f,
+     0.5f,  0.5f, -0.5f,
+     0.5f,  0.5f,  0.5f,
+     0.5f,  0.5f,  0.5f,
+    -0.5f,  0.5f,  0.5f,
+    -0.5f,  0.5f, -0.5f
   };
+
+  //const uint32_t Indices[] =
+  //{
+  //  0, 1, 3,
+  //  1, 2, 3,
+  //};
 
   // Element Buffer Object
   uint32_t VertexArrayObject = 0;
   uint32_t VertexBufferObject = 0;
-  uint32_t ElementBufferObject = 0;
+  //uint32_t ElementBufferObject = 0;
 
   glGenVertexArrays(1, &VertexArrayObject);
   glGenBuffers(1, &VertexBufferObject);
-  glGenBuffers(1, &ElementBufferObject);
+  //glGenBuffers(1, &ElementBufferObject);
 
   glBindVertexArray(VertexArrayObject);
 
   glBindBuffer(GL_ARRAY_BUFFER, VertexBufferObject);
   glBufferData(GL_ARRAY_BUFFER, sizeof(VerticeData), VerticeData, GL_STATIC_DRAW);
 
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ElementBufferObject);
-  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(Indices), Indices, GL_STATIC_DRAW);
+  //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ElementBufferObject);
+  //glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(Indices), Indices, GL_STATIC_DRAW);
 
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), static_cast<void*>(nullptr));
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), static_cast<void*>(nullptr));
   glEnableVertexAttribArray(0);
 
-  glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), reinterpret_cast<void*>(3 * sizeof(float)));
+  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), reinterpret_cast<void*>(offsetof(Vertex, Color)));
   glEnableVertexAttribArray(1);
+
+  glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), reinterpret_cast<void*>(offsetof(Vertex, TexCoords)));
+  glEnableVertexAttribArray(2);
+
+  uint32_t LightVertexArrayObject = 0;
+  uint32_t LightVertexBufferObject = 0;
+
+  glGenVertexArrays(1, &LightVertexArrayObject);
+  glGenBuffers(1, &LightVertexBufferObject);
+
+  glBindVertexArray(LightVertexArrayObject);
+
+  glBindBuffer(GL_ARRAY_BUFFER, LightVertexBufferObject);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(LightVerticeData), LightVerticeData, GL_STATIC_DRAW);
+
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), static_cast<void*>(nullptr));
+  glEnableVertexAttribArray(0);
 
   stbi_set_flip_vertically_on_load(true);
 
-  uint32_t TextureID = 0;
-  glGenTextures(1, &TextureID);
-  glBindTexture(GL_TEXTURE_2D, TextureID);
+  // uint32_t TextureID = 0;
+  // glGenTextures(1, &TextureID);
+  // glBindTexture(GL_TEXTURE_2D, TextureID);
+  //
+  // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+  // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+  //
+  // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+  // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  // {
+  //   int Width, Height, nrChannels;
+  //   uint8_t* Data = stbi_load("LearnOpenGL/Assets/Textures/container.jpg", &Width, &Height, &nrChannels, 0);
+  //   if (Data)
+  //   {
+  //     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, Width, Height, 0, GL_RGB, GL_UNSIGNED_BYTE, Data);
+  //     glGenerateMipmap(GL_TEXTURE_2D);
+  //   }
+  //   else
+  //     std::cerr << "Failed to load texture image." << std::endl;
+  //
+  //   glBindTexture(GL_TEXTURE_2D, 0);
+  //   stbi_image_free(Data);
+  // }
 
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-  {
-    int Width, Height, nrChannels;
-    uint8_t* Data = stbi_load("LearnOpenGL/Assets/Textures/container.jpg", &Width, &Height, &nrChannels, 0);
-    if (Data)
-    {
-      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, Width, Height, 0, GL_RGB, GL_UNSIGNED_BYTE, Data);
-      glGenerateMipmap(GL_TEXTURE_2D);
-    }
-    else
-      std::cerr << "Failed to load texture image." << std::endl;
-
-    glBindTexture(GL_TEXTURE_2D, 0);
-    stbi_image_free(Data);
-  }
-
-  uint32_t TextureIDFace = 0;
-  glGenTextures(1, &TextureIDFace);
-  glBindTexture(GL_TEXTURE_2D, TextureIDFace);
-
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-  {
-    int Width, Height, nrChannels;
-    uint8_t* Data = stbi_load("LearnOpenGL/Assets/Textures/awesomeface.png", &Width, &Height, &nrChannels, 0);
-    if (Data)
-    {
-      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, Width, Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, Data);
-      glGenerateMipmap(GL_TEXTURE_2D);
-    }
-    else
-      std::cerr << "Failed to load texture image." << std::endl;
-
-    glBindTexture(GL_TEXTURE_2D, 0);
-    stbi_image_free(Data);
-  }
-
-  ShaderProgram.Use();
-  ShaderProgram.SetIntParameter("u_Texture1", 0);
-  ShaderProgram.SetIntParameter("u_Texture2", 1);
+  // uint32_t TextureIDFace = 0;
+  // glGenTextures(1, &TextureIDFace);
+  // glBindTexture(GL_TEXTURE_2D, TextureIDFace);
+  //
+  // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+  // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+  //
+  // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+  // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  //
+  // {
+  //   int Width, Height, nrChannels;
+  //   uint8_t* Data = stbi_load("LearnOpenGL/Assets/Textures/awesomeface.png", &Width, &Height, &nrChannels, 0);
+  //   if (Data)
+  //   {
+  //     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, Width, Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, Data);
+  //     glGenerateMipmap(GL_TEXTURE_2D);
+  //   }
+  //   else
+  //     std::cerr << "Failed to load texture image." << std::endl;
+  //
+  //   glBindTexture(GL_TEXTURE_2D, 0);
+  //   stbi_image_free(Data);
+  // }
 
   //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
   glEnable(GL_DEPTH_TEST);
@@ -156,6 +269,9 @@ int main()
   float LastFrameTime = 0.0f;
   float AccumulateTime = 0.0f;
   uint32_t FPS = 0;
+
+  ShaderProgram.Use();
+  ShaderProgram.SetVec3Parameter("u_LightColor", { 1.0f, 1.0f, 1.0f });
 
   while (!glfwWindowShouldClose(Window))
   {
@@ -176,35 +292,49 @@ int main()
 
     Camera.OnUpdate(DeltaTime);
 
-    const glm::vec3& CamPosition = Camera.GetPosition();
-    float Pitch = glm::radians(Camera.GetPitch());
-    float Yaw = glm::radians(Camera.GetYaw());
-    std::cout << "Camera Position: " << CamPosition.x << ", " << CamPosition.y << ", " << CamPosition.z << std::endl;
-    std::cout << "Pitch: " << Pitch << std::endl;
-    std::cout << "Yaw: " << Yaw << std::endl;
-
-    glClearColor(0.392f, 0.584f, 0.930f, 1.0f);
+    glClearColor(0.4805f, 0.4845f, 0.49, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    {
+      auto Model = glm::mat4(1.0f);
+      //Model = glm::rotate(Model, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 
-    auto Model = glm::mat4(1.0f);
-    Model = glm::rotate(Model, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+      auto Projection = glm::mat4(1.0f);
+      Projection = glm::perspective(glm::radians(Camera.GetCameraZoom()), WindowWidth / WindowHeight, 0.1f, 100.0f);
 
-    auto Projection = glm::mat4(1.0f);
-    Projection = glm::perspective(glm::radians(Camera.GetCameraZoom()), WindowWidth / WindowHeight, 0.1f, 100.0f);
+      ShaderProgram.Use();
+      ShaderProgram.SetMat4Parameter("u_Model", Model);
+      ShaderProgram.SetMat4Parameter("u_View", Camera.GetViewMatrix());
+      ShaderProgram.SetMat4Parameter("u_Projection", Projection);
+    }
 
-    ShaderProgram.Use();
-    ShaderProgram.SetMat4Parameter("u_Model", Model);
-    ShaderProgram.SetMat4Parameter("u_View", Camera.GetViewMatrix());
-    ShaderProgram.SetMat4Parameter("u_Projection", Projection);
+    {
+      auto Model = glm::mat4(1.0f);
+      Model = glm::translate(Model, LightPosition);
+      Model = glm::scale(Model, glm::vec3(0.2f));
+
+      auto Projection = glm::mat4(1.0f);
+      Projection = glm::perspective(glm::radians(Camera.GetCameraZoom()), WindowWidth / WindowHeight, 0.1f, 100.0f);
+
+      LightShader.Use();
+      LightShader.SetMat4Parameter("u_Model", Model);
+      LightShader.SetMat4Parameter("u_View", Camera.GetViewMatrix());
+      LightShader.SetMat4Parameter("u_Projection", Projection);
+    }
+
 
     // Element Buffer Object
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, TextureID);
-    glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, TextureIDFace);
-
+    //glActiveTexture(GL_TEXTURE0);
+    //glBindTexture(GL_TEXTURE_2D, TextureID);
+    //glActiveTexture(GL_TEXTURE1);
+    //glBindTexture(GL_TEXTURE_2D, TextureIDFace);
+    ShaderProgram.Use();
     glBindVertexArray(VertexArrayObject);
-    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+    //glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+    glDrawArrays(GL_TRIANGLES, 0, 36);
+
+    LightShader.Use();
+    glBindVertexArray(LightVertexArrayObject);
+    glDrawArrays(GL_TRIANGLES, 0, 36);
     glBindVertexArray(0);
 
     glfwSwapBuffers(Window);
@@ -213,10 +343,10 @@ int main()
 
   glDeleteVertexArrays(1, &VertexArrayObject);
   glDeleteBuffers(1, &VertexBufferObject);
-  glDeleteBuffers(1, &ElementBufferObject);
+  //glDeleteBuffers(1, &ElementBufferObject);
 
-  glDeleteTextures(1, &TextureIDFace);
-  glDeleteTextures(1, &TextureID);
+  //glDeleteTextures(1, &TextureIDFace);
+  //glDeleteTextures(1, &TextureID);
 
   glfwTerminate();
   return 0;
